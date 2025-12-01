@@ -1,0 +1,4 @@
+agno
+google-genai
+flask
+flask-cors
