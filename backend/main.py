@@ -15,12 +15,15 @@ def home():
 def handle_chat():
     data = request.get_json()
     user_prompt = data.get('prompt')
+    session_id = data.get("session_id")
 
     if not user_prompt:
         return jsonify({"error": "Mensagem não fornecida."}), 400
+    elif not session_id:
+        return jsonify({"error": "ID de sessão não fornecido."}), 400
     
     try:
-        agent_response = chat_agent.process_message(user_prompt)
+        agent_response = chat_agent.process_message(user_prompt, session_id)
 
         return jsonify({
             "response": agent_response

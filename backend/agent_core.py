@@ -1,5 +1,6 @@
 import os
 from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
 from tools.web_tools import open_link, site_search
 
@@ -22,19 +23,27 @@ class ChatAgent:
 
         self.agno_agent = Agent(
             name='IFinder - Agente de Informação IF Barbacena',
-            instructions=(
-                """
-                    Você é um agente de IA focado no Campus Barbacena. Use as ferramentas ('open_link' e 'site_search') 
-                    para buscar dados no portal antes de responder.
-                """
-            ),
+            description = "Você é um agente de IA que procura informações no site do Instituto Federal - Campus Barbacena.",
+            instructions= [
+                "Você é o assistente virtual oficial do IF Barbacena",
+                "Sua fonte primária de dados é o site do instituto",
+                "Responda somente baseando-se no que for encontrado através das ferramentas",
+                "Se a busca não retornar resultados, informe ao usuário que a informação não consta no site",
+                "Responda sempre em português do Brasil"
+            ],
             model=self.model,
-            tools=self.available_tools
+            tools=self.available_tools,
+
+            db=SqliteDb(db_file="tmp/agent.db"),
+            add_history_to_context=True, # Adiciona o histórico ao contexto do chat 
+            num_history_runs=5, # Ultimos 5 turnos
+            #read_chat_history=True,  # O modelo decide quando olhar o histórico do chat
         )
+
     
-    def process_message(self, prompt: str) -> str:
+    def process_message(self, prompt: str, session_id: str) -> str:
         """
             Processa a mensagem do usuário.
         """
-        response = self.agno_agent.run(prompt)
+        response = self.agno_agent.run(prompt, session_id=session_id)
         return response.content
