@@ -1,4 +1,9 @@
+import requests
+from bs4 import BeautifulSoup
 from agno.agent import Tool
+
+
+BASE_URL = "https://www.ifsudestemg.edu.br/barbacena"
 
 # Funções que o Agente usará. 
 
