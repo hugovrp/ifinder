@@ -3,3 +3,4 @@ google-genai
 flask
 flask-cors
 sqlalchemy
+beautifulsoup4 
