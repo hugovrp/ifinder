@@ -2,7 +2,7 @@ from agno.tools import tool
 from bs4 import BeautifulSoup
 import requests
 
-BASE_URL = 'https://www.ifsudestemg.edu.br/barbacena'
+BASE_URL = 'https://www.ifsudestemg.edu.br'
 
 # Funções que o Agente usará. 
 
@@ -13,14 +13,18 @@ BASE_URL = 'https://www.ifsudestemg.edu.br/barbacena'
 
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
-def open_link(url: str) -> str:
+def open_link(url: str) -> dict:
     '''
 
     Arg:
         url (str): Link da página a ser aberta.
     '''
     try:
-        full_url = f"{BASE_URL}/{url.lstrip('/')}"
+        # Aceita URL completo ou relativo
+        if url.startswith("http://") or url.startswith("http"):
+            full_url = url
+        else:
+            full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
         
         response = requests.get(full_url, timeout=15)
         response.raise_for_status()
@@ -30,12 +34,14 @@ def open_link(url: str) -> str:
         # Extrai somente o texto visual
         text = soup.get_text(separator='\n', strip=True)
         if not text:
-            return 'Erro ao acessar conteúdo da url {url}.'
+            return {"error": f"Erro ao acessar conteúdo da URL {url}."}
         
+        text = text[:12000]  # Tamanho máximo seguro
         return text 
     
     except Exception as e: 
-        return f'Erro ao acessar o link {url}: {e}'
+        return {"error": f"Erro ao acessar a URL {url}."}
+
 
 @tool(name='site_search', 
       description='Realiza uma busca por um termo específico no site do Campus Barbacena. Retorna uma lista de títulos e URLs.')

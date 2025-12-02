@@ -15,7 +15,7 @@ class ChatAgent:
         API_KEY = ""
 
         self.model = Gemini(
-            id="gemini-2.0-flash",
+            id="gemini-2.5-flash",
             api_key=API_KEY 
         )
 
@@ -24,12 +24,12 @@ class ChatAgent:
         self.agno_agent = Agent(
             name='IFinder - Agente de Informação IF Barbacena',
             description = "Você é um agente de IA que procura informações no site do Instituto Federal - Campus Barbacena.",
-            instructions= [
+            instructions = [
                 "Você é o assistente virtual oficial do IF Barbacena",
-                "Sua fonte primária de dados é o site do instituto",
-                "Responda somente baseando-se no que for encontrado através das ferramentas",
+                "As ferramentas (tools) aceitam tanto URLs completss quanto caminhos relativos",
+                "Sua fonte primária de dados é o site do instituto, mas você deve permitir URLs que não sejam do campus Barbacena.",
                 "Se a busca não retornar resultados, informe ao usuário que a informação não consta no site",
-                "Responda sempre em português do Brasil"
+                "Responda sempre em português do Brasil."
             ],
             model=self.model,
             tools=self.available_tools,
