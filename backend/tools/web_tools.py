@@ -2,11 +2,11 @@ from agno.tools import tool
 from bs4 import BeautifulSoup
 import requests
 
+# Código base do site do Instituto Federal - Campus Barbacena
 BASE_URL = 'https://www.ifsudestemg.edu.br'
 
-# Funções que o Agente usará. 
 
-''' 
+''' Funções que o Agente usará. 
     Usa o decorator @Tool para transformar uma função Python comum em uma ferramenta 
     formal que o LLM consegue entender e usar.
 '''
@@ -21,13 +21,13 @@ def open_link(url: str) -> str:
     permitindo que o modelo obtenha dados diretamente das páginas.]
 
     Args:
-        url (str): A URL da página a ser acessada. Pode ser:
+        url (str): A URL da página a ser acessada.
 
     Returns:
         str: texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
     '''
     try:
-        # Aceita URL completo ou relativo
+        # Aceita URL absoluta ou relativa
         if url.startswith("http://") or url.startswith("http"):
             full_url = url
         else:
@@ -45,13 +45,13 @@ def open_link(url: str) -> str:
         # Extrai somente o texto visual
         text = soup.get_text(separator='\n', strip=True)
         if not text:
-            return {"error": f"Erro ao acessar conteúdo da URL {url}."}
+            return f"Erro ao acessar conteúdo da URL {url}."
         
         text = text[:12000]  # Tamanho máximo seguro
         return text 
     
     except Exception as e: 
-        return {"error": f"Erro ao acessar a URL {url}."}
+        return f"Erro ao acessar a URL {url}."
 
 
 @tool(name='site_search', 
