@@ -13,11 +13,18 @@ BASE_URL = 'https://www.ifsudestemg.edu.br'
 
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
-def open_link(url: str) -> dict:
+def open_link(url: str) -> str:
     '''
+    Abre uma página web e retorna o conteúdo textual limpo, removendo HTML, scripts e estilos. 
+    A URL pode ser fornecida de forma absoluta ou relativa ao domínio padrão do Campus Barbacena.
+    A função é utilizada pelo agente de IA para recuperar informações do site institucional, 
+    permitindo que o modelo obtenha dados diretamente das páginas.]
 
-    Arg:
-        url (str): Link da página a ser aberta.
+    Args:
+        url (str): A URL da página a ser acessada. Pode ser:
+
+    Returns:
+        str: texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
     '''
     try:
         # Aceita URL completo ou relativo
@@ -30,6 +37,10 @@ def open_link(url: str) -> dict:
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Remove scripts e CSS
+        for tag in soup(["script", "style"]):
+            tag.decompose()
 
         # Extrai somente o texto visual
         text = soup.get_text(separator='\n', strip=True)

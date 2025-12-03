@@ -22,7 +22,7 @@ class ChatAgent:
         self.available_tools = [open_link, site_search]
 
         self.agno_agent = Agent(
-            name='IFinder - Agente de Informação IF Barbacena',
+            name = 'IFinder - Agente de Informação IF Barbacena',
             description = "Você é um agente de IA que procura informações no site do Instituto Federal - Campus Barbacena.",
             instructions = [
                 "Você é o assistente virtual oficial do IF Barbacena",
