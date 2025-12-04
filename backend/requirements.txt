@@ -4,3 +4,5 @@ flask
 flask-cors
 sqlalchemy
 beautifulsoup4 
+selenium
+webdriver-manager

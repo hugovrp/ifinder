@@ -36,8 +36,7 @@ class ChatAgent:
 
             db=SqliteDb(db_file="tmp/agent.db"),
             add_history_to_context=True, # Adiciona o histórico ao contexto do chat 
-            num_history_runs=5, # Ultimos 5 turnos
-            #read_chat_history=True,  # O modelo decide quando olhar o histórico do chat
+            num_history_runs=5, # Últimos 5 turnos
         )
 
     
