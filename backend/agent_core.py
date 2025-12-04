@@ -2,7 +2,7 @@ import os
 from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
-from tools.web_tools import open_link, site_search
+from tools.web_tools import open_link, site_search_simple, site_search
 
 class ChatAgent:
     """
@@ -19,7 +19,7 @@ class ChatAgent:
             api_key=API_KEY 
         )
 
-        self.available_tools = [open_link, site_search]
+        self.available_tools = [open_link, site_search_simple, site_search]
 
         self.agno_agent = Agent(
             name = 'IFinder - Agente de Informação IF Barbacena',
