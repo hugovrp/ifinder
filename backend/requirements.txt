@@ -7,3 +7,6 @@ beautifulsoup4
 selenium
 webdriver-manager
 python-dotenv
+ag-ui-protocol
+fastapi
+uvicorn
