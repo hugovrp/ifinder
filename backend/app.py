@@ -17,4 +17,4 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
-    agent_os.serve(app="app:app", host="0.0.0.0", reload=False, allowed_origins=["*"])
+    agent_os.serve(app="app:app", host="0.0.0.0", reload=False)
