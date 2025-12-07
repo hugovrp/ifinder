@@ -2,6 +2,7 @@ import os
 from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
+from dotenv import load_dotenv
 from tools.web_tools import open_link, site_search_simple, site_search
 
 class ChatAgent:
@@ -12,7 +13,7 @@ class ChatAgent:
         """
             Inicializa o modelo LLM e a intância do Agente.
         """
-        API_KEY = ""
+        API_KEY = os.getenv("GOOGLE_API_KEY")
 
         self.model = Gemini(
             id="gemini-2.5-flash",
