@@ -8,4 +8,4 @@ agent_os = AgentOS(agents=[ifinder_agent], interfaces=[AGUI(agent=ifinder_agent)
 app = agent_os.get_app()
 
 if __name__ == "__main__":
-    agent_os.serve(app="app:app", reload=True)
+    agent_os.serve(app="app:app", host="0.0.0.0", reload=False)
