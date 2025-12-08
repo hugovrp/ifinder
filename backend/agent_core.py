@@ -23,15 +23,18 @@ class ChatAgent:
         )
 
         self.available_tools = [open_link, site_search_simple, site_search, open_link_in_selenium]
-        print("\nTools ativas:", [t.name for t in self.available_tools])
-
         self.agno_agent = Agent(
             name = 'IFinder - Agente de Informação IF Barbacena',
             description = "Você é um agente de IA que procura informações no site do Instituto Federal - Campus Barbacena.",
             instructions = [
                 "Você é o assistente virtual oficial do IF Barbacena",
-                "As ferramentas (tools) aceitam tanto URLs completss quanto caminhos relativos",
+                "Utilize todas as suas tools disponíveis, de acordo com o que lhe é pedido", 
+                "Sempre tente usar as ferramentas antes de dizer que não sabe",
+                "Se site_search_simple não encontrar nada, tente site_search com filtros mais amplos",
+                "Se open_link não retornar resultados úteis nada, tente open_link_in_selenium",
+                "As ferramentas (tools) aceitam tanto URLs completas quanto caminhos relativos",
                 "Sua fonte primária de dados é o site do instituto, mas você deve permitir URLs que não sejam do campus Barbacena.",
+                "Se nenhuma ferramenta retornar resultados úteis, só então informe que a informação não foi encontrada",
                 "Se a busca não retornar resultados, informe ao usuário que a informação não consta no site",
                 "Responda sempre em português do Brasil."
             ],
@@ -40,7 +43,7 @@ class ChatAgent:
 
             db=SqliteDb(db_file="tmp/agent.db"),
             add_history_to_context=True, # Adiciona o histórico ao contexto do chat 
-            num_history_runs=5, # Últimos 5 turnos
+            num_history_runs=5,          # Últimos 5 turnos
         )
 
     

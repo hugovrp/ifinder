@@ -7,14 +7,13 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Código base do site do Instituto Federal - Campus Barbacena
-BASE_URL = 'https://www.ifsudestemg.edu.br'
-
-
 ''' Funções que o Agente usará. 
     Usa o decorator @Tool para transformar uma função Python comum em uma ferramenta 
     formal que o LLM consegue entender e usar.
 '''
+
+# Código base do site do Instituto Federal - Campus Barbacena
+BASE_URL = 'https://www.ifsudestemg.edu.br'
 
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
@@ -27,7 +26,8 @@ def open_link(url: str, full_html: bool) -> dict:
 
         Args:
             url (str): A URL da página a ser acessada.
-            full_html (bool): Se True, retorna o HTML completo da página. Se False, retorna apenas o texto visível, removendo scripts e estilos.
+            full_html (bool): Se True, retorna o HTML completo da página. 
+                              Se False, retorna apenas o texto visível, removendo scripts e estilos.
         
         Returns:
             dict : texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
@@ -62,8 +62,9 @@ def open_link(url: str, full_html: bool) -> dict:
     except Exception as e:
         return {"error": f"Erro ao acessar a URL {url}."}
 
-@tool(name='open_link_in_selenium',
-      description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript.')
+@tool(
+    name='open_link_in_selenium',
+    description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript. Use esta ferramenta quando open_link não funcionar ou quando for necessário carregar conteúdo dinâmico.')
 def open_link_in_selenium(url: str) -> dict:
     """
         Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
@@ -76,8 +77,14 @@ def open_link_in_selenium(url: str) -> dict:
         Returns:
             dict: retorna o HTML final do DOM após o carregamento completo da página ou mensagem detalhando o erro ocorrido.
 
-        Observações: O navegador é executado em modo headless (sem interface gráfica).
+        Obs: O navegador é executado em modo headless (sem interface gráfica).
     """
+     # Aceita URL absoluta ou relativa
+    if url.startswith("http://") or url.startswith("http"):
+        full_url = url
+    else:
+        full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
+
     # Configuração do navegador Chrome, executa-o em modo headless (sem interface gráfica)
     options = Options()
     options.add_argument('--headless=new')
@@ -88,10 +95,8 @@ def open_link_in_selenium(url: str) -> dict:
         options=options
     )
 
-    print('Nome do drier: ', driver.name) 
-
     # O Selenium espera até que o evento load seja disparado (documento carregou)
-    driver.get(url)
+    driver.get(full_url)
 
     # Retorna o DOM atual do navegador, em HTML.
     html = driver.page_source
