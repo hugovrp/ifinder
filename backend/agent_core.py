@@ -1,8 +1,9 @@
 import os
 from agno.agent import Agent
+from dotenv import load_dotenv
 from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
-from dotenv import load_dotenv
+from tools.file_tools import read_pdf
 from tools.web_tools import open_link, site_search_simple, site_search, open_link_in_selenium
 
 load_dotenv()
@@ -22,13 +23,14 @@ class ChatAgent:
             api_key=API_KEY 
         )
 
-        self.available_tools = [open_link, site_search_simple, site_search, open_link_in_selenium]
+        self.available_tools = [open_link, open_link_in_selenium, site_search_simple, site_search, read_pdf]
         self.agno_agent = Agent(
             name = 'IFinder - Agente de Informação IF Barbacena',
             description = "Você é um agente de IA que procura informações no site do Instituto Federal - Campus Barbacena.",
             instructions = [
                 "Você é o assistente virtual oficial do IF Barbacena",
                 "Utilize todas as suas tools disponíveis, de acordo com o que lhe é pedido", 
+                "Se uma busca retornar um link para um arquivo .pdf, utilize a tool 'read_pdf' com este link para extrair o conteúdo do documento e responder ao usuário.",
                 "Sempre tente usar as ferramentas antes de dizer que não sabe",
                 "Se site_search_simple não encontrar nada, tente site_search com filtros mais amplos",
                 "Se open_link não retornar resultados úteis nada, tente open_link_in_selenium",
