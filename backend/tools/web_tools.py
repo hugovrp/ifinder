@@ -1,7 +1,6 @@
 import requests
 from agno.tools import tool
 from bs4 import BeautifulSoup
-import requests
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -20,19 +19,19 @@ BASE_URL = 'https://www.ifsudestemg.edu.br'
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
 def open_link(url: str, full_html: bool) -> dict:
-    '''
-    Abre uma página web e retorna o conteúdo textual. 
-    A URL pode ser fornecida de forma absoluta ou relativa ao domínio padrão do Campus Barbacena.
-    A função é utilizada pelo agente de IA para recuperar informações do site institucional, 
-    permitindo que o modelo obtenha dados diretamente das páginas.
+    """
+        Abre uma página web e retorna o conteúdo textual. 
+        A URL pode ser fornecida de forma absoluta ou relativa ao domínio padrão do Campus Barbacena.
+        A função é utilizada pelo agente de IA para recuperar informações do site institucional, 
+        permitindo que o modelo obtenha dados diretamente das páginas.
 
-    Args:
-        url (str): A URL da página a ser acessada.
-        full_html (bool): Se True, retorna o HTML completo da página. Se False, retorna apenas o texto visível, removendo scripts e estilos.
-    
-    Returns:
-        dict : texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
-    '''
+        Args:
+            url (str): A URL da página a ser acessada.
+            full_html (bool): Se True, retorna o HTML completo da página. Se False, retorna apenas o texto visível, removendo scripts e estilos.
+        
+        Returns:
+            dict : texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
+    """
     try:
         # Aceita URL absoluta ou relativa
         if url.startswith("http://") or url.startswith("http"):
@@ -55,13 +54,55 @@ def open_link(url: str, full_html: bool) -> dict:
             if not text:
                 return {"error": f"Erro ao acessar conteúdo da URL {url}."}
         
-            text = text[:12000]  # Tamanho máximo seguro
+            text = text[:12000]  # Limita o tamanho do HTML para evitar sobrecarga no LLM
             return {'html': text}
     
         return {'html': soup}
         
     except Exception as e:
         return {"error": f"Erro ao acessar a URL {url}."}
+
+@tool(name='open_link_in_selenium',
+      description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript.')
+def open_link_in_selenium(url: str) -> dict:
+    """
+        Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
+        Esta ferramenta deve ser utilizada quando o conteúdo da página é gerado dinamicamente via JavaScript, 
+        o que não pode ser obtido apenas com requisições HTTP simples usando a biblioteca requests.
+
+        Args:
+            url (str): URL completa da página que deverá ser aberta no navegador.
+
+        Returns:
+            dict: retorna o HTML final do DOM após o carregamento completo da página ou mensagem detalhando o erro ocorrido.
+
+        Observações: O navegador é executado em modo headless (sem interface gráfica).
+    """
+    # Configuração do navegador Chrome, executa-o em modo headless (sem interface gráfica)
+    options = Options()
+    options.add_argument('--headless=new')
+
+    # Baixa e inicializa o ChromeDriver compatível com o Google Chrome instalado na máquina
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )
+
+    print('Nome do drier: ', driver.name) 
+
+    # O Selenium espera até que o evento load seja disparado (documento carregou)
+    driver.get(url)
+
+    # Retorna o DOM atual do navegador, em HTML.
+    html = driver.page_source
+
+    # Fecha a janela do navegador e finaliza o processo do ChromeDriver, 
+    # liberando todos os recursos de memória utilizados
+    driver.quit()
+
+    # Limita o tamanho do HTML para evitar sobrecarga no LLM
+    html = html[:12000]
+    return {'html': html}
 
 """ Teste:
     curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"prompt\": \"Use a tool site_search_simple com o seguinte parâmetro: query=\\\"refeitório\\\". Mostre o resultado retornado pela tool.\", \"session_id\": \"test_simple_01\"}"

@@ -3,7 +3,9 @@ from agno.agent import Agent
 from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
 from dotenv import load_dotenv
-from tools.web_tools import open_link, site_search_simple, site_search
+from tools.web_tools import open_link, site_search_simple, site_search, open_link_in_selenium
+
+load_dotenv()
 
 class ChatAgent:
     """
@@ -20,7 +22,8 @@ class ChatAgent:
             api_key=API_KEY 
         )
 
-        self.available_tools = [open_link, site_search_simple, site_search]
+        self.available_tools = [open_link, site_search_simple, site_search, open_link_in_selenium]
+        print("\nTools ativas:", [t.name for t in self.available_tools])
 
         self.agno_agent = Agent(
             name = 'IFinder - Agente de Informação IF Barbacena',
