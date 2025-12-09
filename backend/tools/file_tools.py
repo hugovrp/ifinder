@@ -9,13 +9,16 @@ from markdownify import markdownify as md
 def read_pdf(path):
     """
         Abre um arquivo PDF a partir de um URL e extrai seu conteúdo textual,
-        convertendo-o para o formato Markdown.
+        convertendo-o para o formato Markdown para facilitar a análise pelo agente de IA.
+
+        Esta ferramenta é crucial quando uma busca (como 'site_search') retorna um link direto para um 
+        documento (.pdf) que contém a informação necessária (ex: Editais, Cardápios, Calendários Acadêmicos).
 
         Args:
             path (str): A URL completa (absoluta) do arquivo PDF a ser acessado.
-        
+
         Returns:
-            str: O texto extraído do PDF no formato Markdown. Se a leitura falhar, retorna uma string de erro detalhada.
+            str: O texto extraído do PDF no formato Markdown. Se a leitura falhar, retorna uma string de erro.
     """
     try:
         # Baixa o conteúdo binário do arquivo PDF da internet
