@@ -9,22 +9,28 @@ from markdownify import markdownify as md
 def read_pdf(path):
     """
         Abre um arquivo PDF a partir de um URL e extrai seu conteúdo textual,
-        convertendo-o para o formato Markdown para facilitar a análise pelo agente de IA.
-
-        Esta ferramenta é crucial quando uma busca (como 'site_search') retorna um link direto para um 
-        documento (.pdf) que contém a informação necessária (ex: Editais, Cardápios, Calendários Acadêmicos).
+        convertendo-o para o formato Markdown.
 
         Args:
             path (str): A URL completa (absoluta) do arquivo PDF a ser acessado.
         
         Returns:
-            str: O texto extraído do PDF no formato Markdown. Se a leitura falhar, retorna uma string de erro.
+            str: O texto extraído do PDF no formato Markdown. Se a leitura falhar, retorna uma string de erro detalhada.
     """
-    doc = fitz.open(path)
-    text = ""
+    try:
+        # Baixa o conteúdo binário do arquivo PDF da internet
+        response = requests.get(path, timeout=30)
+        response.raise_for_status()
 
-    for page in doc:
-        text += page.get_text()
+        doc = fitz.open(stream=response.content, filetype="pdf")
+        text = ""
 
-    markdown = md(text)
-    return markdown
+        for page in doc:
+            text += page.get_text()
+
+        markdown = md(text)
+        return markdown
+    except requests.exceptions.RequestException as e:
+        return f"Erro de rede ao tentar acessar o PDF. Verifique se o link está funcionando: {path}. Erro: {e}"
+    except Exception as e:
+        return f"Erro ao processar o arquivo PDF: {e}"
