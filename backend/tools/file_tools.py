@@ -1,3 +1,4 @@
+import os
 import fitz  
 import requests
 from agno.tools import tool
@@ -8,7 +9,7 @@ from markdownify import markdownify as md
       description='Abre um arquivo .pdf e retorna o seu conteúdo em markdown. Útil para ler informações de buscas que retornam um .pdf, p.ex.: Cardápio, Calendário, Editais, etc.')
 def read_pdf(path):
     """
-        Abre um arquivo PDF a partir de um URL e extrai seu conteúdo textual,
+        Abre um arquivo PDF local ou a partir de um URL e extrai seu conteúdo textual,
         convertendo-o para o formato Markdown para facilitar a análise pelo agente de IA.
 
         Esta ferramenta é crucial quando uma busca (como 'site_search') retorna um link direto para um 
@@ -21,11 +22,15 @@ def read_pdf(path):
             str: O texto extraído do PDF no formato Markdown. Se a leitura falhar, retorna uma string de erro.
     """
     try:
-        # Baixa o conteúdo binário do arquivo PDF da internet
-        response = requests.get(path, timeout=30)
-        response.raise_for_status()
+        if not os.path.exists(path):
+            # Baixa o conteúdo binário do arquivo PDF da internet
+            response = requests.get(path, timeout=30)
+            response.raise_for_status()
 
-        doc = fitz.open(stream=response.content, filetype="pdf")
+            doc = fitz.open(stream=response.content, filetype="pdf")
+        else :
+            doc = fitz.open(path, filetype="pdf")
+
         text = ""
 
         for page in doc:
