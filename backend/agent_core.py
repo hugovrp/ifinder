@@ -22,7 +22,7 @@ class ChatAgent:
             id="gemini-2.5-flash",
             api_key=API_KEY 
         )
-
+        self.db = SqliteDb(db_file="tmp/agent.db")
         self.available_tools = [open_link, open_link_in_selenium, site_search_simple, site_search, read_pdf]
         self.agno_agent = Agent(
             name = 'IFinder - Agente de Informação IF Barbacena',
@@ -43,15 +43,15 @@ class ChatAgent:
             model=self.model,
             tools=self.available_tools,
 
-            db=SqliteDb(db_file="tmp/agent.db"),
+            db=self.db,
             add_history_to_context=True, # Adiciona o histórico ao contexto do chat 
             num_history_runs=5,          # Últimos 5 turnos
         )
 
     
-    def process_message(self, prompt: str, session_id: str) -> str:
+    def process_message(self, prompt: str, user_id: str, session_id: str) -> str:
         """
             Processa a mensagem do usuário.
         """
-        response = self.agno_agent.run(prompt, session_id=session_id)
+        response = self.agno_agent.run(prompt, user_id=user_id, session_id=session_id)
         return response.content
