@@ -58,6 +58,16 @@ class ChatAgent:
     
     def generate_descriptive_text(self, conversation_history: list) -> str:
         """
+            Gera um título curto e descritivo para a conversa com base no histórico recente.
+
+            Esta função formata as últimas mensagens da sessão e utiliza um agente auxiliar (summarizer) para criar 
+            um tópico conciso em Português do Brasil, ideal para exibição em interfaces de lista de chats.
+
+            Args:
+                conversation_history (list): Lista de dicionários contendo o histórico das mensagens.
+
+            Returns:
+                str: O título gerado (aprox. 3 a 6 palavras). 
         """
         if not conversation_history:
             return "Nova Conversa"
