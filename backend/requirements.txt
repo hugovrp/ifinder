@@ -10,3 +10,5 @@ python-dotenv
 ag-ui-protocol
 fastapi
 uvicorn
+pymupdf
+markdownify
