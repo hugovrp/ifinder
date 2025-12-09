@@ -55,3 +55,40 @@ class ChatAgent:
         """
         response = self.agno_agent.run(prompt, session_id=session_id)
         return response.content
+    
+    def generate_descriptive_text(self, conversation_history: list) -> str:
+        """
+        """
+        if not conversation_history:
+            return "Nova Conversa"
+        
+        # Formata o histórico para o prompt
+        history_text = ""
+        for msg in conversation_history[-6:]: # Limita as últimas mensagens para economizar tokens
+            role = msg.get('role', 'unknown')
+            content = msg.get('content', '')
+            # Trunca mensagens muito longas para não confundir o sumarizador
+            if len(content) > 500:
+                content = content[:500] + "..."
+            history_text += f"{role}: {content}\n"
+
+        # Agente temporário apenas para a sumarização
+        summarizer_agent = Agent(
+            model=self.model,
+            description="Você é um assitente especializado em resumir conversas.",
+            instructions=[
+                "Analise o histórico da conversa fornecido.",
+                "Gere um título curto (máximo de 4 a 6 palavras) que descreva o tópico principal.",
+                "O título deve estar em Português do Brasil.",
+                "Não use aspas, não use ponto final e não seja genérico.",
+                "Se a conversa for apenas saudações, retorn 'Nova Conversa'.",
+                "Retorne APENAS o texto do título."
+            ],
+            markdown=False # Retorna texto puro
+        )
+        try:
+            response = summarizer_agent.run(f"Gere um título para:\n{history_text}")
+            return response.content
+        except Exception as e:
+            print(f"Erro ao gerar título: {e}")
+            return "Conversa Salva"

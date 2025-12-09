@@ -12,6 +12,28 @@ chat_agent = ChatAgent()
 def home():
     return send_file('../frontend/index.html')
 
+@app.route('/chat', methods=['POST'])
+def handle_chat():
+    
+    data = request.get_json()
+    user_prompt = data.get('prompt')
+    session_id = data.get("session_id")
+
+    if not user_prompt:
+        return jsonify({"error": "Mensagem não fornecida."}), 400
+    elif not session_id:
+        return jsonify({"error": "ID de sessão não fornecido."}), 400
+    
+    try:
+        agent_response = chat_agent.process_message(user_prompt, session_id)
+
+        return jsonify({
+            "response": agent_response
+        })
+    
+    except Exception as e:
+        return jsonify({"error": f"Erro interno do Agente: {str(e)}"}), 500
+
 @app.route('/auth/generate', methods=['GET'])
 def generate_user_id():
     """ Gera um UUID novo para um usuário.
@@ -46,29 +68,34 @@ def get_session_conversation():
     messages_list = [ {"role": m.role, "content": m.content} for m in messages ]
     
     return jsonify({ "chat": messages_list }), 200
-    
 
-@app.route('/chat', methods=['POST'])
-def handle_chat():
-    
+@app.route('/sessions/title', methods=['POST'])
+def generate_session_title():
+    """
+        Gera um título descritivo para uma sessão específica baseado no histórico atual.
+    """
     data = request.get_json()
-    user_prompt = data.get('prompt')
     session_id = data.get("session_id")
 
-    if not user_prompt:
-        return jsonify({"error": "Mensagem não fornecida."}), 400
-    elif not session_id:
+    if not session_id:
         return jsonify({"error": "ID de sessão não fornecido."}), 400
     
     try:
-        agent_response = chat_agent.process_message(user_prompt, session_id)
+        try:
+            messages = chat_agent.agno_agent.get_chat_history(session_id=session_id)
+        except Exception: # Assume que é uma nova conversa
+            return jsonify({"title": "Nova Conversa"}), 200
 
-        return jsonify({
-            "response": agent_response
-        })
-    
+        messages_list = [{"role": m.role, "content": m.content} for m in messages]
+
+        if not messages_list:
+            return jsonify({"title": "Nova Conversa"}), 200
+        
+        title = chat_agent.generate_descriptive_text(messages_list)
+
+        return jsonify({"title": title}), 200
     except Exception as e:
-        return jsonify({"error": f"Erro interno do Agente: {str(e)}"}), 500
+        return jsonify({"error": f"Erro ao gerar título: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5050)
