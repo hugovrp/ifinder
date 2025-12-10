@@ -1,0 +1,774 @@
+/*
+ * =================================================================================
+ * Configurações Globais e Variáveis (Theme)
+ * =================================================================================
+ */
+:root {
+    /* Cores do IF Sudeste MG e Tema */
+    --primary-color: #004d25;
+    /* Verde Principal */
+    --primary-hover: #00381b;
+    /* Verde Escuro (Hover) */
+
+    /* Cores de Fundo e Superfície */
+    --background-color: #fcfdfc;
+    --sidebar-bg: #f3f5f4;
+    --surface-color: #ffffff;
+
+    /* Tipografia e Bordas */
+    --text-primary: #1f1f1f;
+    --text-secondary: #5e5e5e;
+    --border-color: #e3e3e3;
+
+    /* Feedback */
+    --error-color: #d93025;
+
+    /* Espaçamento (Design System) */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Animações */
+    --transition-speed: 0.2s;
+}
+
+/*
+ * =================================================================================
+ * Reset e Base
+ * =================================================================================
+ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    /* Impede rolagem na página inteira */
+}
+
+/*
+ * =================================================================================
+ * Layout Principal
+ * =================================================================================
+ */
+.app_container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+/* Área Principal de Conteúdo */
+.main_content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    background-color: var(--surface-color);
+}
+
+/*
+ * =================================================================================
+ * Barra Lateral (Sidebar)
+ * =================================================================================
+ */
+.sidebar {
+    width: 280px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    transition: width var(--transition-speed) ease, padding var(--transition-speed) ease, transform var(--transition-speed) ease;
+    z-index: 100;
+    overflow: hidden;
+    white-space: nowrap;
+    /* Previne quebra de texto durante animação de largura */
+}
+
+/* Estado Recolhido (Desktop) */
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    border: none;
+}
+
+.sidebar_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-sm);
+}
+
+/* Botão Nova Conversa */
+.new_chat_btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    padding: 10px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    /* Centralização relativa para manter o ícone fixo à esquerda */
+    position: relative;
+    justify-content: center;
+}
+
+.new_chat_btn i {
+    position: absolute;
+    left: 16px;
+}
+
+.new_chat_btn:hover {
+    background-color: #e8eaed;
+    color: var(--text-primary);
+}
+
+.close_sidebar_btn {
+    display: none;
+    /* Escondido por padrão no desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    padding: var(--spacing-xs);
+    margin-left: 8px;
+}
+
+/* Seção de Histórico */
+.history_section {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.section_title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-xs);
+    padding-left: var(--spacing-xs);
+}
+
+.history_list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history_item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+}
+
+.history_item:hover {
+    background-color: #e0e3e2;
+}
+
+.history_item.active {
+    background-color: #d1d6d4;
+    font-weight: 500;
+}
+
+.history_link_area {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.history_link_area span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.delete_chat_btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    /* Invisível até hover */
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.history_item:hover .delete_chat_btn {
+    opacity: 1;
+}
+
+.delete_chat_btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--error-color);
+}
+
+.history_empty_state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.sidebar_footer {
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav_item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    width: 100%;
+    text-align: left;
+    transition: background-color var(--transition-speed);
+}
+
+.nav_item:hover {
+    background-color: #e0e3e2;
+}
+
+/*
+ * =================================================================================
+ * Barra Superior (Top Bar)
+ * =================================================================================
+ */
+.top_bar {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-md);
+}
+
+.menu_btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    display: block;
+    /* Visível em desktop para toggle */
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.logo {
+    height: 32px;
+    width: auto;
+}
+
+.brand h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Badge de Modo Anônimo */
+.anonymous_badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #333;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: var(--spacing-sm);
+    animation: fadeIn 0.3s ease;
+}
+
+.anonymous_badge i {
+    font-size: 1rem;
+}
+
+/*
+ * =================================================================================
+ * Área de Chat e Mensagens
+ * =================================================================================
+ */
+.chat_area {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md) 0;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    position: relative;
+}
+
+/* Tela de Boas-vindas */
+.welcome_screen {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.welcome_content {
+    max-width: 600px;
+    color: var(--text-primary);
+}
+
+.welcome_icon {
+    display: inline-block;
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xl);
+    background: #e6f4ea;
+    padding: 20px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.welcome_icon.anonymous {
+    background-color: #333;
+    color: white;
+}
+
+/* Container de Mensagens */
+.messages_container {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding-bottom: 2rem;
+}
+
+.message {
+    display: flex;
+    gap: var(--spacing-md);
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.message_avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.message_avatar.user {
+    background-color: var(--text-secondary);
+}
+
+.message_content {
+    flex: 1;
+    line-height: 1.6;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+/* Markdown Styles */
+.message_content p {
+    margin-bottom: 0.8em;
+}
+
+.message_content p:last-child {
+    margin-bottom: 0;
+}
+
+.message_content ul,
+.message_content ol {
+    margin-bottom: 0.8em;
+    padding-left: 1.5em;
+}
+
+.message_content code {
+    background-color: #f0f2f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.message_content pre {
+    background-color: #f0f2f5;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 0.8em;
+}
+
+.message_content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.message_content a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/*
+ * =================================================================================
+ * Área de Entrada (Input)
+ * =================================================================================
+ */
+.input_area {
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.input_wrapper {
+    background-color: #f0f2f5;
+    border-radius: 30px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: flex-end;
+    /* Alinha na parte inferior para multi-linhas */
+    gap: var(--spacing-sm);
+    transition: background-color var(--transition-speed);
+}
+
+.input_wrapper:focus-within {
+    background-color: #e8eaed;
+    box-shadow: 0 0 0 1px #d1d6d4;
+}
+
+textarea {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 12px 0;
+    resize: none;
+    font-size: 1rem;
+    color: var(--text-primary);
+    max-height: 150px;
+    /* Altura máxima antes de scrollar */
+    min-height: 24px;
+}
+
+.send_btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    transition: background-color var(--transition-speed);
+    margin-bottom: 2px;
+}
+
+.send_btn:hover:not(:disabled) {
+    background-color: #dce4e0;
+}
+
+.send_btn:disabled {
+    color: #b0b0b0;
+    cursor: default;
+}
+
+.disclaimer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+/*
+ * =================================================================================
+ * Indicador de Digitação (Loading)
+ * =================================================================================
+ */
+.typing_indicator {
+    display: flex;
+    gap: 4px;
+    padding: 8px 0;
+}
+
+.typing_dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--text-secondary);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing_dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing_dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Spinner Simples */
+.loader_spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/*
+ * =================================================================================
+ * Componentes Flutuantes (Toast & Modal)
+ * =================================================================================
+ */
+
+/* Toast (Notificações) */
+.toast_container {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.toast {
+    grid-area: 1 / 1;
+    /* Sobreposição perfeita */
+    background-color: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: slideDownFade 0.3s ease forwards;
+    white-space: normal;
+    /* Permite quebra de linha */
+    max-width: 90vw;
+    /* Limita a largura a 90% da janela */
+    text-align: center;
+    /* Centraliza o texto se quebrar */
+}
+
+.toast.error {
+    background-color: var(--error-color);
+}
+
+@keyframes slideDownFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal de Confirmação */
+.modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.modal_overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal_content {
+    background-color: var(--surface-color);
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(20px);
+    transition: transform 0.2s ease;
+}
+
+.modal_overlay.open .modal_content {
+    transform: translateY(0);
+}
+
+.modal_content h3 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.modal_content p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.modal_content p span {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn_text,
+.btn_danger {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    border: none;
+}
+
+.btn_text {
+    background: none;
+    color: var(--text-secondary);
+}
+
+.btn_text:hover {
+    background-color: #f0f2f5;
+}
+
+.btn_danger {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.btn_danger:hover {
+    background-color: #b71c1c;
+}
+
+/*
+ * =================================================================================
+ * Responsividade (Mobile)
+ * =================================================================================
+ */
+@media (max-width: 768px) {
+    .sidebar {
+        position: absolute;
+        height: 100%;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .close_sidebar_btn {
+        display: block;
+    }
+
+    .messages_container {
+        padding: 0 var(--spacing-md);
+    }
+
+    /* Ícone de lixeira sempre visível no mobile */
+    .delete_chat_btn {
+        opacity: 1 !important;
+        color: var(--text-secondary) !important;
+        display: flex;
+    }
+}

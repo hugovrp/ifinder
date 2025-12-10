@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFinder - IF Sudeste MG</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons (Biblioteca de Ícones) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Markdown & Sanitização (Para renderizar mensagens do bot com segurança) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app_container">
+
+        <!-- Barra Lateral (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar_header">
+                <button class="new_chat_btn" id="newChatBtn">
+                    <i class="ph ph-plus"></i>
+                    <span>Nova Conversa</span>
+                </button>
+                <button class="close_sidebar_btn" id="closeSidebarBtn" aria-label="Fechar menu">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="history_section">
+                <span class="section_title">Histórico</span>
+                <div class="history_list" id="historyList">
+                    <!-- Itens do histórico serão inseridos aqui via JS -->
+                    <div class="history_empty_state">
+                        <span class="loader_spinner small"></span>
+                        <p>Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar_footer">
+                <button class="nav_item" id="anonymousChatBtn">
+                    <i class="ph ph-mask-happy"></i>
+                    <span>Modo Anônimo</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main_content">
+            <!-- Barra Superior -->
+            <header class="top_bar">
+                <button class="menu_btn" id="openSidebarBtn" aria-label="Abrir menu">
+                    <i class="ph ph-list"></i>
+                </button>
+                <div class="brand">
+                    <img src="assets/logo.png" alt="IF Logo" class="logo">
+                    <h1>Assistente IFinder</h1>
+                    <div class="anonymous_badge" id="anonymousBadge" style="display: none;">
+                        <i class="ph ph-mask-happy"></i>
+                        <span>Anônimo</span>
+                    </div>
+                </div>
+                <div class="top_actions">
+                    <!-- Espaço reservado para ações futuras (Perfil, Login) -->
+                </div>
+            </header>
+
+            <!-- Área de Chat -->
+            <div class="chat_area" id="chatArea">
+
+                <!-- Tela de Boas-vindas -->
+                <div class="welcome_screen" id="welcomeScreen">
+                    <div class="welcome_content">
+                        <i class="ph ph-robot welcome_icon"></i>
+                        <h2>Como posso ajudar você hoje?</h2>
+                        <p>Pergunte sobre cursos, editais, notícias e muito mais do IF Sudeste MG.</p>
+                    </div>
+                </div>
+
+                <!-- Container de Mensagens -->
+                <div class="messages_container" id="messagesContainer" style="display: none;">
+                    <!-- Mensagens inseridas via JS -->
+                </div>
+            </div>
+
+            <!-- Área de Entrada de Texto -->
+            <div class="input_area">
+                <div class="input_wrapper">
+                    <textarea id="userPrompt" placeholder="Digite sua mensagem aqui..." rows="1" wrap="soft"></textarea>
+                    <button class="send_btn" id="sendBtn" aria-label="Enviar mensagem" disabled>
+                        <i class="ph ph-paper-plane-right"></i>
+                    </button>
+                </div>
+                <p class="disclaimer">
+                    O assistente pode cometer erros. Verifique as informações importantes.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Container de Notificações (Toasts) -->
+    <div class="toast_container" id="toastContainer"></div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal_overlay" id="deleteModal">
+        <div class="modal_content">
+            <h3>Excluir conversa?</h3>
+            <p>Você tem certeza que deseja excluir "<span id="deleteModalTitle"></span>"?</p>
+            <div class="modal_actions">
+                <button class="btn_text" id="cancelDeleteBtn">Cancelar</button>
+                <button class="btn_danger" id="confirmDeleteBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lógica da Aplicação -->
+    <script src="script.js"></script>
+</body>
+
+</html>
