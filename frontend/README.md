@@ -1,4 +1,4 @@
-# Interface Web - Agente IF Sudeste MG
+# Interface Web - IFinder
 
 Frontend desenvolvido para interação com o agente de IA IFinder.
 
