@@ -77,7 +77,10 @@ def get_all_conversations():
     for session in sessions:
         messages = chat_agent.agno_agent.get_chat_history(session_id=session.session_id)
         messages_list = [ {"role": m.role, "content": m.content} for m in messages ]
-        chats.append(messages_list)
+        chats.append({
+            "summary": session.summary.summary if session.summary else None,
+            "messages": messages_list,
+        })
 
     return jsonify({ "chats": chats }), 200
 
@@ -97,8 +100,10 @@ def get_session_conversation():
 
     messages = chat_agent.agno_agent.get_chat_history(session_id=session_id)
     messages_list = [ {"role": m.role, "content": m.content} for m in messages ]
+    
+    summary = chat_agent.agno_agent.get_session_summary(session_id=session_id)
 
-    return jsonify({ "chat": messages_list }), 200
+    return jsonify({ "summary": summary.summary if summary else None,  "messages": messages_list }), 200
 
 @app.route('/sessions/title', methods=['POST'])
 def generate_session_title():

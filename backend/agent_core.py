@@ -1,8 +1,9 @@
 import os
 from agno.agent import Agent
-from dotenv import load_dotenv
+from agno.session import SessionSummaryManager
 from agno.db.sqlite import SqliteDb
 from agno.models.google import Gemini
+from dotenv import load_dotenv
 from tools.file_tools import read_pdf
 from tools.web_tools import open_link, site_search_simple, site_search, open_link_in_selenium
 
@@ -16,11 +17,12 @@ class ChatAgent:
         """
             Inicializa o modelo LLM e a intância do Agente.
         """
-        API_KEY = os.getenv("GOOGLE_API_KEY")
+        GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+        SUMMARIZER_API_KEY = os.getenv("SUMMARIZER_API_KEY")
 
         self.model = Gemini(
             id="gemini-2.5-flash",
-            api_key=API_KEY 
+            api_key=GOOGLE_API_KEY 
         )
         self.db = SqliteDb(db_file="tmp/agent.db")
         self.available_tools = [open_link, open_link_in_selenium, site_search_simple, site_search, read_pdf]
@@ -46,6 +48,22 @@ class ChatAgent:
             db=self.db,
             add_history_to_context=True, # Adiciona o histórico ao contexto do chat 
             num_history_runs=5,          # Últimos 5 turnos
+
+            enable_session_summaries=True, # Permite criação de um resumo do chat
+            session_summary_manager = SessionSummaryManager(
+                model=Gemini(
+                    id="gemini-2.0-flash",
+                    api_key=SUMMARIZER_API_KEY 
+                ), 
+                session_summary_prompt= """
+                Gere um título curto para ser exibido no histórico do usuário.
+
+                Estilo: Use frases nominais curtas (ex: 'Planejamento de Viagem', 'Erro no Python', 'Receita de Bolo'). Evite frases completas ou verbos narrativos como 'Usuário pede...', 'Assistente fala...'.   
+                Tamanho: De 3 a 6 palavras.
+                Objetivo: O título deve resumir o tópico principal ou a intenção do usuário.
+                """
+            ),
+            add_session_summary_to_context=False
         )
 
     
