@@ -503,6 +503,10 @@ function renderChat(messages) {
  * @param {boolean} animate - Se deve animar a entrada (fade-in).
  */
 function addMessageToUI(role, content, animate = true) {
+    // Validação: Não exibe mensagens vazias
+    if (!content || String(content).trim() === '') {
+        return;
+    }
     const isUser = role === 'user';
     const msgDiv = document.createElement('div');
     msgDiv.className = 'message';
