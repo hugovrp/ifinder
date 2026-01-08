@@ -1,7 +1,6 @@
 agno
 google-genai
 flask
-flask-cors
 sqlalchemy
 beautifulsoup4 
 selenium

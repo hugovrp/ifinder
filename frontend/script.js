@@ -1,14 +1,22 @@
 /**
- * Configurações e Constantes
+ * Função auxiliar para obter userId do localStorage de forma segura
+ * Garante que valores inválidos (null, string vazia, "null") sejam tratados como null
  */
-const API_BASE_URL = 'http://localhost:5050';
+function getUserIdFromStorage() {
+    const storedValue = localStorage.getItem('if_agent_user_id');
+    // Retorna null se o valor for null, string vazia ou a string "null"
+    if (!storedValue || storedValue === 'null' || storedValue.trim() === '') {
+        return null;
+    }
+    return storedValue;
+}
 
 /**
  * Gerenciamento de Estado
  * Armazena informações vitais sobre o usuário, sessão e estado da interface.
  */
 const state = {
-    userId: localStorage.getItem('if_agent_user_id'),
+    userId: getUserIdFromStorage(),
     sessionId: localStorage.getItem('if_agent_current_session_id'),
     isSidebarOpen: false,
     isLoading: false, // Pode ser usado para travar interface se necessário
@@ -47,12 +55,17 @@ async function init() {
 
     // Verificação ou Geração de ID de Usuário
     if (!state.userId) {
+        console.log('[IFinder] userId não encontrado no localStorage, gerando novo...');
         try {
             await generateUserId();
+            console.log('[IFinder] userId gerado com sucesso:', state.userId);
         } catch (error) {
+            console.error('[IFinder] Erro ao gerar userId:', error);
             showToast('Erro ao criar identificação de usuário.', 'error');
             return; // Impede prosseguimento se não houver ID
         }
+    } else {
+        console.log('[IFinder] userId encontrado no localStorage:', state.userId);
     }
 
     // Carrega o histórico de sessões anteriores do localStorage
@@ -78,13 +91,25 @@ async function init() {
  */
 async function generateUserId() {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/generate`);
-        if (!response.ok) throw new Error('Falha na requisição de autenticação');
+        console.log('[IFinder] Fazendo requisição para gerar userId...');
+        const response = await fetch('/auth/generate');
+
+        if (!response.ok) {
+            throw new Error(`Falha na requisição de autenticação: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
+
+        if (!data.user_id) {
+            throw new Error('Backend não retornou userId válido');
+        }
+
         state.userId = data.user_id;
         localStorage.setItem('if_agent_user_id', state.userId);
+        console.log('[IFinder] userId armazenado no localStorage:', state.userId);
+
     } catch (error) {
-        console.error('Erro ao gerar ID de usuário:', error);
+        console.error('[IFinder] Erro ao gerar ID de usuário:', error);
         throw error;
     }
 }
@@ -97,7 +122,7 @@ async function generateUserId() {
 async function apiCreateSessionId(userIdOverride) {
     try {
         const uid = userIdOverride || state.userId;
-        const response = await fetch(`${API_BASE_URL}/sessions/generate`, {
+        const response = await fetch('/sessions/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: uid })
@@ -133,7 +158,7 @@ async function loadSession(sessionId) {
     elements.messagesContainer.innerHTML = '<div class="history_empty_state"><span class="loader_spinner"></span></div>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/sessions/get`, {
+        const response = await fetch('/sessions/get', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ session_id: sessionId, user_id: state.userId })
@@ -209,7 +234,7 @@ async function sendMessage() {
 
     try {
         // Envia requisição para o backend
-        const response = await fetch(`${API_BASE_URL}/chat`, {
+        const response = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

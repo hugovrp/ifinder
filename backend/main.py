@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
 from agent_core import ChatAgent
 from agno.db.base import SessionType
 import uuid
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
-CORS(app)
 
 chat_agent = ChatAgent()
 
@@ -104,35 +102,6 @@ def get_session_conversation():
     summary = chat_agent.agno_agent.get_session_summary(session_id=session_id)
 
     return jsonify({ "summary": summary.summary if summary else None,  "messages": messages_list }), 200
-
-@app.route('/sessions/title', methods=['POST'])
-def generate_session_title():
-    """
-        Gera um título descritivo para uma sessão específica baseado no histórico atual.
-    """
-    data = request.get_json()
-    session_id = data.get("session_id")
-    user_id = data.get("user_id")
-
-    if not session_id or not user_id:
-        return jsonify({"error": "ID de usuário e/ou sessão não fornecido."}), 400
-    
-    try:
-        try:
-            messages = chat_agent.agno_agent.get_chat_history(session_id=session_id)
-        except Exception: # Assume que é uma nova conversa
-            return jsonify({"title": "Nova Conversa"}), 200
-
-        messages_list = [{"role": m.role, "content": m.content} for m in messages]
-
-        if not messages_list:
-            return jsonify({"title": "Nova Conversa"}), 200
-        
-        title = chat_agent.generate_descriptive_text(messages_list)
-
-        return jsonify({"title": title}), 200
-    except Exception as e:
-        return jsonify({"error": f"Erro ao gerar título: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5050)
