@@ -7,13 +7,60 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-''' Funções que o Agente usará. 
-    Usa o decorator @Tool para transformar uma função Python comum em uma ferramenta 
-    formal que o LLM consegue entender e usar.
-'''
-
 # Código base do site do Instituto Federal - Campus Barbacena
 BASE_URL = 'https://www.ifsudestemg.edu.br'
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+}
+
+@tool(name='get_site_highlights', 
+      description='Procura as notícias mais recentes e destaques diretamente no portal do IF Sudeste MG - Campus Barbacena. Use esta ferramenta sempre que o utilizador perguntar "o que há de novo", "últimas notícias" ou "quais os destaques".')
+def get_site_highlights():
+    try:
+        url = "https://www.ifsudestemg.edu.br/noticias/barbacena"
+        response = requests.get(url, headers=HEADERS, timeout=15)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Procura os itens de notícia (ajustado para a estrutura comum do Plone/Portal Padrão)
+        news_items = soup.find_all('h2', class_='tileHeadline')
+        
+        if not news_items:
+            return "Não foi possível encontrar notícias recentes no layout atual da página."
+
+        results = ["Últimas Notícias do Campus Barbacena:"]
+        for item in news_items[:5]: # Limite das 5 mais recentes
+            title = item.get_text(strip=True)
+            link_tag = item.find('a', href=True)
+            link = link_tag['href'] if link_tag else "Link não disponível"
+            results.append(f"- {title} (Link: {link})")
+        
+        return "\n".join(results)
+    except Exception as e:
+        return f"Erro ao aceder às notícias em tempo real: {str(e)}"
+
+@tool(name='get_page_navigation',
+      description='Extrai links e títulos de uma página para navegação manual. Use para explorar o site quando a busca falhar.')
+def get_page_navigation(url: str) -> str:
+    try:
+        target_url = url if url.startswith('http') else f"{BASE_URL}{url}"
+        response = requests.get(target_url, headers=HEADERS, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Focar no conteúdo principal e menus, ignorando rodapés pesados
+        nav_elements = soup.find_all(['nav', 'div'], {'id': ['content', 'portal-column-one', 'viewlet-above-content']})
+        
+        links = []
+        for area in nav_elements:
+            for a in area.find_all('a', href=True):
+                texto = a.get_text(strip=True)
+                href = a['href']
+                if texto and len(texto) > 3:
+                    links.append(f"[{texto}]({href})")
+
+        return "\n".join(list(set(links))[:50]) # Retorna os primeiros 50 links únicos
+    except Exception as e:
+        return f"Erro ao navegar: {str(e)}"
 
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
@@ -39,7 +86,7 @@ def open_link(url: str, full_html: bool) -> dict:
         else:
             full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
         
-        response = requests.get(full_url, timeout=15)
+        response = requests.get(full_url, headers=HEADERS, timeout=15)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -54,7 +101,7 @@ def open_link(url: str, full_html: bool) -> dict:
             if not text:
                 return {"error": f"Erro ao acessar conteúdo da URL {url}."}
         
-            text = text[:12000]  # Limita o tamanho do HTML para evitar sobrecarga no LLM
+            text = text[:20000]  # Limita o tamanho do HTML para evitar sobrecarga no LLM
             return {'html': text}
     
         return {'html': soup}
@@ -62,56 +109,6 @@ def open_link(url: str, full_html: bool) -> dict:
     except Exception as e:
         return {"error": f"Erro ao acessar a URL {url}."}
 
-@tool(
-    name='open_link_in_selenium',
-    description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript. Use esta ferramenta quando open_link não funcionar ou quando for necessário carregar conteúdo dinâmico.')
-def open_link_in_selenium(url: str) -> dict:
-    """
-        Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
-        Esta ferramenta deve ser utilizada quando o conteúdo da página é gerado dinamicamente via JavaScript, 
-        o que não pode ser obtido apenas com requisições HTTP simples usando a biblioteca requests.
-
-        Args:
-            url (str): URL completa da página que deverá ser aberta no navegador.
-
-        Returns:
-            dict: retorna o HTML final do DOM após o carregamento completo da página ou mensagem detalhando o erro ocorrido.
-
-        Obs: O navegador é executado em modo headless (sem interface gráfica).
-    """
-     # Aceita URL absoluta ou relativa
-    if url.startswith("http://") or url.startswith("http"):
-        full_url = url
-    else:
-        full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
-
-    # Configuração do navegador Chrome, executa-o em modo headless (sem interface gráfica)
-    options = Options()
-    options.add_argument('--headless=new')
-
-    # Baixa e inicializa o ChromeDriver compatível com o Google Chrome instalado na máquina
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
-
-    # O Selenium espera até que o evento load seja disparado (documento carregou)
-    driver.get(full_url)
-
-    # Retorna o DOM atual do navegador, em HTML.
-    html = driver.page_source
-
-    # Fecha a janela do navegador e finaliza o processo do ChromeDriver, 
-    # liberando todos os recursos de memória utilizados
-    driver.quit()
-
-    # Limita o tamanho do HTML para evitar sobrecarga no LLM
-    html = html[:12000]
-    return {'html': html}
-
-""" Teste:
-    curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"prompt\": \"Use a tool site_search_simple com o seguinte parâmetro: query=\\\"refeitório\\\". Mostre o resultado retornado pela tool.\", \"session_id\": \"test_simple_01\"}"
-"""
 @tool(name='site_search_simple', 
       description='Realiza uma busca simples por um termo no site do Campus Barbacena.')
 def site_search_simple(query: str) -> str:
@@ -124,7 +121,7 @@ def site_search_simple(query: str) -> str:
         url = "https://www.ifsudestemg.edu.br/barbacena/@@busca"
         params = {'SearchableText': query}
         
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, headers=HEADERS, params=params, timeout=10)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -146,10 +143,6 @@ def site_search_simple(query: str) -> str:
     except Exception as e:
         return f"Erro na busca: {str(e)}"
 
-""" Teste
-    curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"prompt\": \"Use a tool site_search com os seguintes parâmetros: query=\\\"servidores\\\", item_types=[\\\"pagina\\\"], date_range=\\\"Sempre\\\" e sort_by=\\\"alfabetica\\\". Mostre o resultado retornado pela tool.\",
- \"session_id\": \"test_session_01\"}"
-"""
 @tool(name='site_search', 
       description='Realiza uma busca avançada no site do IF Barbacena com filtros de tipo, data e ordenação.')
 def site_search(query: str, item_types: list[str] = None, date_range: str = None, sort_by: str = None) -> str:
@@ -220,7 +213,7 @@ def site_search(query: str, item_types: list[str] = None, date_range: str = None
             params.append(('sort_on', 'relevance'))
     
     try:
-        response = requests.get(base_url, params=params, timeout=15)
+        response = requests.get(base_url, headers=HEADERS, params=params, timeout=15)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')

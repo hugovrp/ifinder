@@ -1,7 +1,11 @@
 __pycache__/
 env/
 venv/
+.venv/
 ENV/
 build/
 dist/
 temp/
+.env
+.DS_Store
+Thumbs.db
