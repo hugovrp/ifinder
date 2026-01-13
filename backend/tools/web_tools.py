@@ -2,10 +2,15 @@ import requests
 from agno.tools import tool
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from webdriver_manager.firefox import GeckoDriverManager
 
 # Código base do site do Instituto Federal - Campus Barbacena
 BASE_URL = 'https://www.ifsudestemg.edu.br'
@@ -64,20 +69,29 @@ def get_page_navigation(url: str) -> str:
 
 @tool(name='open_link', 
       description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
-def open_link(url: str, full_html: bool) -> dict:
+def open_link(url: str) -> dict:
     """
-        Abre uma página web e retorna o conteúdo textual. 
+        Recupera o conteúdo de uma página web e retorna o texto visível e todos os links encontrados na página.
         A URL pode ser fornecida de forma absoluta ou relativa ao domínio padrão do Campus Barbacena.
-        A função é utilizada pelo agente de IA para recuperar informações do site institucional, 
-        permitindo que o modelo obtenha dados diretamente das páginas.
+        A função é utilizada pelo agente de IA para recuperar informações do site institucional, permitindo 
+        que o modelo obtenha dados diretamente das páginas para análise do conteúdo publicado em páginas específicas.
 
-        Args:
-            url (str): A URL da página a ser acessada.
-            full_html (bool): Se True, retorna o HTML completo da página. 
-                              Se False, retorna apenas o texto visível, removendo scripts e estilos.
-        
-        Returns:
-            dict : texto extraído da página, com no máximo 12.000 caracteres ou uma mensagem de erro.
+    Args:
+        url (str): Endereço da página a ser acessada. Pode ser uma URL completa
+                   (iniciando com http/https) ou um caminho relativo ao domínio base.
+
+    Returns:
+        dict:
+            Em caso de sucesso:
+            {
+                "text": "<conteúdo textual da página>",
+                "links": [
+                    { "text": "<texto do link>", "url": "<endereço do link>" },
+                    ...
+                ]
+            }
+
+            Em caso de erro: {"error": "<mensagem de erro>"}
     """
     try:
         # Aceita URL absoluta ou relativa
@@ -86,29 +100,97 @@ def open_link(url: str, full_html: bool) -> dict:
         else:
             full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
         
-        response = requests.get(full_url, headers=HEADERS, timeout=15)
+        response = requests.get(full_url, timeout=15)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        if full_html == False:
-            # Remove scripts e CSS
-            for tag in soup(["script", "style"]):
-                tag.decompose()
+        # Remove scripts e CSS
+        for tag in soup(["script", "style"]):
+            tag.decompose()
 
-            # Extrai somente o texto visual
-            text = soup.get_text(separator='\n', strip=True)
-            if not text:
-                return {"error": f"Erro ao acessar conteúdo da URL {url}."}
-        
-            text = text[:20000]  # Limita o tamanho do HTML para evitar sobrecarga no LLM
-            return {'html': text}
-    
-        return {'html': soup}
-        
+        # Coleta os links
+        links = []
+        for a in soup.find_all("a"):
+            text = a.get_text(" ", strip=True)
+            href = a.get("href", "")
+
+            if not href:
+                continue
+
+            links.append({
+                "text": text if text else None,
+                "url": href
+            })
+
+        # Extrai somente o texto visual
+        text = soup.get_text(separator='\n', strip=True)
+        if not text:
+            return {"error": f"Erro ao acessar conteúdo da URL {url}."}
+
+        return {"text": text, "links": links}
+            
     except Exception as e:
         return {"error": f"Erro ao acessar a URL {url}."}
 
+@tool(
+    name='open_link_in_selenium',
+    description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript. Use esta ferramenta quando open_link não funcionar ou quando for necessário carregar conteúdo dinâmico.')
+def open_link_in_selenium(url: str) -> dict:
+    """
+        Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
+        Esta ferramenta deve ser utilizada quando o conteúdo da página é gerado dinamicamente via JavaScript, 
+        o que não pode ser obtido apenas com requisições HTTP simples usando a biblioteca requests.
+
+        Args:
+            url (str): URL completa da página que deverá ser aberta no navegador.
+
+        Returns:
+            dict: retorna o HTML final do DOM após o carregamento completo da página ou mensagem detalhando o erro ocorrido.
+
+        Obs: O navegador é executado em modo headless (sem interface gráfica).
+    """
+    # Aceita URL absoluta ou relativa
+    if url.startswith("http://") or url.startswith("http"):
+        full_url = url
+    else:
+        full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
+
+    
+    try:
+        # Configuração do navegador Chrome, executa-o em modo headless (sem interface gráfica)
+        options = Options()
+        options.add_argument('--headless=new')
+
+        # Baixa e inicializa o ChromeDriver compatível com o Google Chrome instalado na máquina
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=options
+        )
+
+    except Exception:
+        options = FirefoxOptions()
+        options.add_argument("--headless")
+
+        driver = webdriver.Firefox(
+            service=FirefoxService(GeckoDriverManager().install()),
+            options=options
+        )
+
+    # Abre a página da url
+    driver.get(full_url)
+
+    # Acessa o DOM atual do navegador (HTML).
+    html = driver.page_source
+
+    # Fecha a janela do navegador e finaliza o processo do ChromeDriver, liberando todos os recursos de memória utilizados
+    driver.quit()
+
+    return {'html': html}
+
+""" Teste:
+    curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"prompt\": \"Use a tool site_search_simple com o seguinte parâmetro: query=\\\"refeitório\\\". Mostre o resultado retornado pela tool.\", \"session_id\": \"test_simple_01\"}"
+"""
 @tool(name='site_search_simple', 
       description='Realiza uma busca simples por um termo no site do Campus Barbacena.')
 def site_search_simple(query: str) -> str:
