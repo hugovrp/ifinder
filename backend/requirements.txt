@@ -8,3 +8,4 @@ webdriver-manager
 python-dotenv
 pymupdf
 markdownify
+flask-cors
