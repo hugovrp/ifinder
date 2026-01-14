@@ -68,7 +68,7 @@ def get_page_navigation(url: str) -> str:
         return f"Erro ao navegar: {str(e)}"
 
 @tool(name='open_link', 
-      description='FERRAMENTA PRINCIPAL: Abre qualquer URL e retorna TODO o conteúdo da página formatado + lista completa de links. Use esta ferramenta para: 1) Ler conteúdo de uma página específica quando você tem a URL, 2) Obter detalhes de uma notícia, 3) Acessar páginas institucionais (corpo docente, fale conosco, etc). SEMPRE prefira esta ferramenta quando souber a URL ou tiver recebido uma URL de outra ferramenta.')
+      description='FERRAMENTA PRINCIPAL: Abre qualquer URL e retorna o conteúdo da página formatado + lista completa de links. Use esta ferramenta para: 1) Ler conteúdo de uma página específica quando você tem a URL, 2) Obter detalhes de uma notícia, 3) Acessar páginas institucionais (corpo docente, fale conosco, etc). SEMPRE prefira esta ferramenta quando souber a URL ou tiver recebido uma URL de outra ferramenta.')
 def open_link(url: str) -> dict:
     """
         Recupera o conteúdo de uma página web e retorna o texto visível e todos os links encontrados na página.
@@ -114,7 +114,7 @@ def open_link(url: str) -> dict:
         for a in soup.find_all("a"):
             text = a.get_text(" ", strip=True)
             href = a.get("href", "")
-
+            
             if not href:
                 continue
 
@@ -135,10 +135,10 @@ def open_link(url: str) -> dict:
 
 @tool(
     name='open_link_in_selenium',
-    description='SEGUNDA ESCOLHA para páginas dinâmicas: Abre URL usando navegador real (Chrome headless) para carregar conteúdo JavaScript/AJAX. Use quando: 1) open_link falhou ou retornou conteúdo incompleto, 2) Página usa JavaScript pesado (ex: corpo docente, listas longas), 3) Conteúdo aparece vazio ou cortado. IMPORTANTE: Mais lento que open_link, use apenas quando necessário.')
+    description='SEGUNDA ESCOLHA para páginas dinâmicas: Abre URL usando navegador real (Chrome headless ou Firefox headless) para carregar conteúdo JavaScript/AJAX. Use quando: 1) open_link falhou ou retornou conteúdo incompleto, 2) Página usa JavaScript pesado (ex: corpo docente, listas longas), 3) Conteúdo aparece vazio ou cortado. IMPORTANTE: Mais lento que open_link, use apenas quando necessário.')
 def open_link_in_selenium(url: str) -> dict:
     """
-        Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
+        Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome ou Firefox em modo headless).
         Esta ferramenta deve ser utilizada quando o conteúdo da página é gerado dinamicamente via JavaScript, 
         o que não pode ser obtido apenas com requisições HTTP simples usando a biblioteca requests.
 
@@ -156,7 +156,6 @@ def open_link_in_selenium(url: str) -> dict:
     else:
         full_url = f"{BASE_URL.rstrip('/')}/{url.lstrip('/')}"
 
-    
     try:
         # Configuração do navegador Chrome, executa-o em modo headless (sem interface gráfica)
         options = Options()
@@ -180,10 +179,10 @@ def open_link_in_selenium(url: str) -> dict:
     # Abre a página da url
     driver.get(full_url)
 
-    # Acessa o DOM atual do navegador (HTML).
+    # Acessa o DOM atual do navegador (HTML)
     html = driver.page_source
 
-    # Fecha a janela do navegador e finaliza o processo do ChromeDriver, liberando todos os recursos de memória utilizados
+    # Fecha a janela do navegador e finaliza o processo do ChromeDriver
     driver.quit()
 
     return {'html': html}
