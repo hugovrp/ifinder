@@ -10,7 +10,7 @@ BASE_URL = 'https://www.ifsudestemg.edu.br'
 
 @tool(
     name='open_link_in_selenium',
-    description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript. Use esta ferramenta quando open_link não funcionar ou quando for necessário carregar conteúdo dinâmico.')
+    description='SEGUNDA ESCOLHA para páginas dinâmicas: Abre URL usando navegador real (Chrome headless) para carregar conteúdo JavaScript/AJAX. Use quando: 1) open_link falhou ou retornou conteúdo incompleto, 2) Página usa JavaScript pesado (ex: corpo docente, listas longas), 3) Conteúdo aparece vazio ou cortado. IMPORTANTE: Mais lento que open_link, use apenas quando necessário.')
 def open_link_in_selenium(url: str) -> dict:
     """
         Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).

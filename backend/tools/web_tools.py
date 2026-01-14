@@ -19,7 +19,7 @@ HEADERS = {
 }
 
 @tool(name='get_site_highlights', 
-      description='Procura as notícias mais recentes e destaques diretamente no portal do IF Sudeste MG - Campus Barbacena. Use esta ferramenta sempre que o utilizador perguntar "o que há de novo", "últimas notícias" ou "quais os destaques".')
+      description='PRIMEIRA OPÇÃO para notícias: Retorna automaticamente as 5 notícias mais recentes do Campus Barbacena sem precisar de parâmetros. Use SEMPRE que o usuário perguntar sobre notícias, novidades, destaques, ou "o que há de novo". NÃO requer busca - acessa direto a página de notícias.')
 def get_site_highlights():
     try:
         url = "https://www.ifsudestemg.edu.br/noticias/barbacena"
@@ -45,7 +45,7 @@ def get_site_highlights():
         return f"Erro ao aceder às notícias em tempo real: {str(e)}"
 
 @tool(name='get_page_navigation',
-      description='Extrai links e títulos de uma página para navegação manual. Use para explorar o site quando a busca falhar.')
+      description='Extrai TODOS os links de navegação e menus de uma página específica. Use para: 1) Descobrir quais seções/páginas estão disponíveis em uma área do site, 2) Listar links relacionados a um tema, 3) Explorar menus e submenus. Útil quando você sabe a área mas não o link exato. Requer URL da página como parâmetro.')
 def get_page_navigation(url: str) -> str:
     try:
         target_url = url if url.startswith('http') else f"{BASE_URL}{url}"
@@ -68,7 +68,7 @@ def get_page_navigation(url: str) -> str:
         return f"Erro ao navegar: {str(e)}"
 
 @tool(name='open_link', 
-      description='Abre um URL e retorna o texto principal da página. Útil para ler o conteúdo de uma notícia ou página específica.')
+      description='FERRAMENTA PRINCIPAL: Abre qualquer URL e retorna TODO o conteúdo da página formatado + lista completa de links. Use esta ferramenta para: 1) Ler conteúdo de uma página específica quando você tem a URL, 2) Obter detalhes de uma notícia, 3) Acessar páginas institucionais (corpo docente, fale conosco, etc). SEMPRE prefira esta ferramenta quando souber a URL ou tiver recebido uma URL de outra ferramenta.')
 def open_link(url: str) -> dict:
     """
         Recupera o conteúdo de uma página web e retorna o texto visível e todos os links encontrados na página.
@@ -135,7 +135,7 @@ def open_link(url: str) -> dict:
 
 @tool(
     name='open_link_in_selenium',
-    description='Abre uma URL usando um navegador real (Selenium/Chrome) e retorna o HTML da página, incluindo conteúdo carregado por JavaScript. Use esta ferramenta quando open_link não funcionar ou quando for necessário carregar conteúdo dinâmico.')
+    description='SEGUNDA ESCOLHA para páginas dinâmicas: Abre URL usando navegador real (Chrome headless) para carregar conteúdo JavaScript/AJAX. Use quando: 1) open_link falhou ou retornou conteúdo incompleto, 2) Página usa JavaScript pesado (ex: corpo docente, listas longas), 3) Conteúdo aparece vazio ou cortado. IMPORTANTE: Mais lento que open_link, use apenas quando necessário.')
 def open_link_in_selenium(url: str) -> dict:
     """
         Abre uma página web utilizando um navegador real controlado pelo Selenium (Google Chrome em modo headless).
@@ -192,7 +192,7 @@ def open_link_in_selenium(url: str) -> dict:
     curl -X POST http://127.0.0.1:5000/chat -H "Content-Type: application/json" -d "{\"prompt\": \"Use a tool site_search_simple com o seguinte parâmetro: query=\\\"refeitório\\\". Mostre o resultado retornado pela tool.\", \"session_id\": \"test_simple_01\"}"
 """
 @tool(name='site_search_simple', 
-      description='Realiza uma busca simples por um termo no site do Campus Barbacena.')
+      description='ÚLTIMO RECURSO: Busca básica no mecanismo de busca interno do site (requer texto EXATO para funcionar bem). Use SOMENTE quando: 1) Não existe URL direta conhecida, 2) Outras ferramentas (get_site_highlights, open_link, get_page_navigation) não são aplicáveis, 3) Você realmente não sabe onde procurar. LIMITAÇÃO IMPORTANTE: A busca interna do site é RUIM e DESATUALIZADA - ela requer correspondência exata de texto.')
 def site_search_simple(query: str) -> str:
     """
         Busca simples que retorna títulos e links encontrados.
@@ -226,7 +226,7 @@ def site_search_simple(query: str) -> str:
         return f"Erro na busca: {str(e)}"
 
 @tool(name='site_search', 
-      description='Realiza uma busca avançada no site do IF Barbacena com filtros de tipo, data e ordenação.')
+      description='ÚLTIMO RECURSO com filtros: Versão avançada de site_search_simple que permite filtrar por tipo de documento (Notícia, Edital, Evento, Arquivo, etc), data e ordenação. Use SOMENTE quando site_search_simple não encontrar resultados E você precisa filtrar por tipo específico de conteúdo. LIMITAÇÃO CRÍTICA: A busca interna do site é RUIM e requer texto exato - sempre prefira usar URLs diretas e outras ferramentas.')
 def site_search(query: str, item_types: list[str] = None, date_range: str = None, sort_by: str = None) -> str:
     """
         Realiza busca com filtros.

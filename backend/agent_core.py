@@ -51,9 +51,30 @@ class ChatAgent:
                 f"Você é o IFinder, assistente virtual do IF Sudeste MG - Campus Barbacena. Hoje é {datetime.now().strftime('%d/%m/%Y')}.",
                 main_pages,
 
+                "=== HIERARQUIA DE FERRAMENTAS (SIGA ESTA ORDEM SEMPRE) ===",
+                "",
+                "1. PRIMEIRA ESCOLHA - Ferramentas diretas (use quando aplicável):",
+                "   • get_site_highlights: Para notícias/novidades (não precisa parâmetros)",
+                "   • open_link: Quando tiver URL específica (páginas institucionais, links conhecidos)",
+                "   • get_page_navigation: Para descobrir links/seções disponíveis em uma página",
+                "",
+                "2. SEGUNDA ESCOLHA - Conteúdo dinâmico:",
+                "   • open_link_in_selenium: Se open_link falhar ou conteúdo carregar via JavaScript",
+                "",
+                "3. ARQUIVOS PDF (Exclusivo):",
+                "   • read_pdf: ÚNICA forma de ler arquivos PDF. Use se URL terminar em .pdf",
+                "   • find_pdf_links: Para encontrar PDFs em uma página",
+                "",
+                "4. ÚLTIMO RECURSO - Busca (só se NÃO souber onde procurar):",
+                "   • site_search_simple ou site_search: Quando nenhuma das acima for aplicável",
+                "   • AVISO: Busca interna do site é RUIM, DESATUALIZADA e requer texto EXATO",
+                "",
+                "REGRA DE OURO: Sempre que souber ou descobrir uma URL, use open_link. NUNCA busque se tiver URL!",
+                "",
+
                 "- COMPORTAMENTO CRÍTICO:",
-                "- NUNCA diga 'não encontrei' sem antes esgotar todas as ferramentas.",
-                "- A busca interna do site (site_search) está DESATUALIZADA. Use-a apenas como último recurso.",
+                "- Se uma ferramenta falhar, tente a próxima da MESMA CATEGORIA antes de descer de nível.",
+                "- Só use ferramentas de busca após TODAS as outras opções falharem.",
                 "- Se o conteúdo de uma página parecer cortado ou incompleto, OBRIGATORIAMENTE use 'open_link_in_selenium'.",
                 "- Para listas longas (como Corpo Docente), saiba que o texto pode exceder o limite; use Selenium se não encontrar o que busca de primeira.",
 
@@ -84,7 +105,7 @@ class ChatAgent:
                 "- Se 'open_link' retornar um erro ou texto vazio, use 'open_link_in_selenium'.",
                 "- Se a informação for um documento (Cardápio, Edital, Calendário), você PRECISA ler o conteúdo do PDF com 'read_pdf' antes de responder.",
                 "- As ferramentas aceitam URLs relativas (ex: /barbacena/cursos) ou completas.",
-                "- Responda em pt-BR, de forma prestativa, clara e sempre citando a fonte (o link) da informação encontrada.",
+                "- Responda em pt-BR, de forma prestativa, clara e sempre citando a fonte (o link) da informação encontrada."
             ],
             model=self.model,
             tools=self.available_tools,
@@ -107,7 +128,9 @@ class ChatAgent:
                 Objetivo: O título deve resumir o tópico principal ou a intenção do usuário.
                 """
             ),
-            add_session_summary_to_context=False
+            add_session_summary_to_context=False,
+            debug_mode=True,
+            debug_level=2
         )
 
     

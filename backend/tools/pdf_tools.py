@@ -11,7 +11,7 @@ HEADERS = {
 }
 
 @tool(name='read_pdf', 
-      description='Abre um arquivo .pdf e retorna o seu conteúdo em markdown. Útil para ler informações de buscas que retornam um .pdf, p.ex.: Cardápio, Calendário, Editais, etc.')
+      description='FERRAMENTA EXCLUSIVA para PDFs: ÚNICA ferramenta capaz de ler arquivos .pdf. Use OBRIGATORIAMENTE quando o link for um PDF (ex: Cardápios, Calendários, Editais). Não tente usar open_link ou selenium em arquivos PDF.')
 def read_pdf(path):
     """
         Abre um arquivo PDF local ou a partir de um URL e extrai seu conteúdo textual,
@@ -51,7 +51,7 @@ def read_pdf(path):
         return f"Erro ao processar o arquivo PDF: {e}"
 
 @tool(name='find_pdf_links', 
-      description='Procura especificamente por links de arquivos PDF numa página específica.')
+      description='BUSCA DE DOCUMENTOS: Procura e lista todos os links de arquivos PDF em uma página específica. Use quando: 1) Precisa encontrar documentos em uma página (ex: calendário acadêmico), 2) Quer listar editais/documentos disponíveis. Útil em conjunto com read_pdf. Requer URL da página como parâmetro.')
 def find_pdf_links(url: str) -> list:
     try:
         target_url = url if url.startswith('http') else f"{BASE_URL}{url}"
