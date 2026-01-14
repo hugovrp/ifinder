@@ -36,8 +36,8 @@ class ChatAgent:
             "- Corpo Docente: https://www.ifsudestemg.edu.br/barbacena/institucional/corpo-docente\n"
             "- Página Inicial: https://www.ifsudestemg.edu.br/barbacena\n"
             "- Notícias: https://www.ifsudestemg.edu.br/noticias/barbacena\n"
-            "- Calendário: https://www.ifsudestemg.edu.br/barbacena/ensino/calendario-academico\n"
-            "- Assistência Estudantil: https://www.ifsudestemg.edu.br/barbacena/estudante/assistencia-estudantil\n"
+            "- Calendário: https://www.ifsudestemg.edu.br/documentos-institucionais/unidades/barbacena/diretorias-sistemicas/ensino/calendario-academico\n"
+            "- Assistência Estudantil: https://www.ifsudestemg.edu.br/barbacena/institucional/ensino/apoio-ao-discente/assistencia-estudantil\n"
             "- Mapa do Site: https://www.ifsudestemg.edu.br/barbacena/mapadosite\n"
         )
         
@@ -94,7 +94,7 @@ class ChatAgent:
                 "- Se achar um link de PDF, use 'read_pdf'. Verifique se a DATA no PDF condiz com a semana atual.",
 
                 "CALENDÁRIO ACADÊMICO:",
-                "- Tente navegar via 'https://www.ifsudestemg.edu.br/barbacena/ensino/calendario-academico'.",
+                "- Tente navegar via 'https://www.ifsudestemg.edu.br/documentos-institucionais/unidades/barbacena/diretorias-sistemicas/ensino/calendario-academico'.",
                 "- Procure o PDF do ano letivo atual (ex: 2024 ou 2025) usando 'find_pdf_links' e 'read_pdf'.",
 
                 "CONTATOS E COORDENAÇÕES:",
