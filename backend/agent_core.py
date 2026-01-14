@@ -104,6 +104,7 @@ class ChatAgent:
                 "- REGRAS DE EXECUÇÃO:",
                 "- Se 'open_link' retornar um erro ou texto vazio, use 'open_link_in_selenium'.",
                 "- Se a informação for um documento (Cardápio, Edital, Calendário), você PRECISA ler o conteúdo do PDF com 'read_pdf' antes de responder.",
+                "- No site do instituto, arquivos podem ser organizados por pastas (ex: Calendario 2025/calendario.pdf). Portanto quando for necessario encontrar um pdf, navegue pelas pastas (links) ate que seja encontrado",
                 "- As ferramentas aceitam URLs relativas (ex: /barbacena/cursos) ou completas.",
                 "- Responda em pt-BR, de forma prestativa, clara e sempre citando a fonte (o link) da informação encontrada."
             ],
