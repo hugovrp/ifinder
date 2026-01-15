@@ -2,6 +2,8 @@
 
 O **IFinder** é um assistente virtual inteligente desenvolvido para o IF Sudeste MG - Campus Barbacena. Ele utiliza Inteligência Artificial para facilitar o acesso à informação, ajudando alunos, servidores e a comunidade a encontrar notícias, editais, contatos e documentos no portal oficial da instituição.
 
+<img width="1474" height="775" alt="Captura de tela 2026-01-15 025117" src="https://github.com/user-attachments/assets/4110dfb1-afd4-43ce-83fa-512d85af24a4" />
+
 ## Sobre
 
 O projeto atua como um agente autônomo capaz de navegar pelo site do instituto, ler documentos e responder perguntas em linguagem natural. Diferente de uma busca comum, o IFinder entende o contexto da pergunta e seleciona a melhor ferramenta para buscar a resposta, seja lendo uma notícia recente, acessando o calendário acadêmico em PDF ou buscando informações sobre o corpo docente.
